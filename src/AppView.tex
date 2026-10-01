@@ -1,0 +1,155 @@
+import { useEffect, useState } from 'react';
+import {
+  ArrowLeft, Bell, HeartPulse, Home, LineChart, User,
+  Droplet, Wind, Thermometer, AlertTriangle,
+} from 'lucide-react';
+
+type Tab = 'home' | 'alerts' | 'history' | 'profile';
+
+type Vitals = {
+  heart: number;
+  glucose: number;
+  oxygen: number;
+  temp: number;
+  history: number[];
+};
+
+const rand = (min: number, max: number) =>
+  Math.round(min + Math.random() * (max - min));
+
+export default function AppView({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<Tab>('home');
+  const [vitals, setVitals] = useState<Vitals>({
+    heart: 76,
+    glucose: 94,
+    oxygen: 98,
+    temp: 36.7,
+    history: Array.from({ length: 12 }, () => rand(65, 90)),
+  });
+
+  // Fake "live" data — updates every 2 seconds
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVitals((v) => {
+        const heart = rand(68, 92);
+        return {
+          heart,
+          glucose: rand(85, 110),
+          oxygen: rand(95, 100),
+          temp: +(36.4 + Math.random() * 0.6).toFixed(1),
+          history: [...v.history.slice(1), heart],
+        };
+      });
+    }, 2000);
+    return () => clearInterval(id);
+  }, []);
+
+  const alert =
+    vitals.heart > 88 || vitals.oxygen < 96
+      ? 'One of your vitals is outside your normal range.'
+      : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-top">
+        <button className="app-back" onClick={onClose} aria-label="Back">
+          <ArrowLeft size={20} />
+        </button>
+        <div className="app-title">
+          <span className="kicker">LifePatch App</span>
+          <strong>Hello, Alex</strong>
+        </div>
+        <div className="app-avatar">A</div>
+      </header>
+
+      <main className="app-main">
+        {tab === 'home' && (
+          <>
+            <div className="vitals-grid">
+              <VitalCard icon={<HeartPulse size={16} />} label="Heart" value={vitals.heart} unit="bpm" />
+              <VitalCard icon={<Droplet size={16} />} label="Glucose" value={vitals.glucose} unit="mg/dL" />
+              <VitalCard icon={<Wind size={16} />} label="Oxygen" value={vitals.oxygen} unit="%" />
+              <VitalCard icon={<Thermometer size={16} />} label="Temp" value={vitals.temp} unit="°C" />
+            </div>
+
+            {alert && (
+              <div className="app-alert">
+                <AlertTriangle size={18} />
+                <div>
+                  <strong>Heads up</strong>
+                  <small>{alert}</small>
+                </div>
+              </div>
+            )}
+
+            <div className="app-chart-card">
+              <div className="app-chart-head">
+                <span>Heart rate · last 24s</span>
+                <strong>{vitals.heart} bpm</strong>
+              </div>
+              <div className="app-chart">
+                {vitals.history.map((h, i) => (
+                  <i key={i} style={{ height: `${Math.max(8, (h - 60) * 1.6)}px` }} />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {tab === 'alerts' && (
+          <div className="app-empty">
+            <Bell size={28} />
+            <strong>No alerts right now</strong>
+            <small>We'll let you know if anything needs attention.</small>
+          </div>
+        )}
+
+        {tab === 'history' && (
+          <div className="app-empty">
+            <LineChart size={28} />
+            <strong>History is coming soon</strong>
+            <small>Your past readings will appear here.</small>
+          </div>
+        )}
+
+        {tab === 'profile' && (
+          <div className="app-empty">
+            <User size={28} />
+            <strong>Alex Morgan</strong>
+            <small>Device: LifePatch v1 · Connected</small>
+          </div>
+        )}
+      </main>
+
+      <nav className="app-tabs">
+        <TabBtn active={tab === 'home'} onClick={() => setTab('home')} icon={<Home size={20} />} label="Home" />
+        <TabBtn active={tab === 'alerts'} onClick={() => setTab('alerts')} icon={<Bell size={20} />} label="Alerts" />
+        <TabBtn active={tab === 'history'} onClick={() => setTab('history')} icon={<LineChart size={20} />} label="History" />
+        <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} icon={<User size={20} />} label="Profile" />
+      </nav>
+    </div>
+  );
+}
+
+function VitalCard({ icon, label, value, unit }: { icon: React.ReactNode; label: string; value: number; unit: string }) {
+  return (
+    <div className="vital-tile">
+      <div className="vital-tile-head">
+        <span>{icon}</span>
+        <small>{label}</small>
+      </div>
+      <div className="vital-tile-value">
+        {value}<em>{unit}</em>
+      </div>
+    </div>
+  );
+}
+
+function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button className={`app-tab ${active ? 'active' : ''}`} onClick={onClick}>
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
