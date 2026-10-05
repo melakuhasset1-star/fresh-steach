@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Assistant } from '@/Assistant';
 import {
   ArrowUpRight,
   CircleHelp,
@@ -21,7 +22,7 @@ const seniorImage = 'https://images.pexels.com/photos/28278106/pexels-photo-2827
 const checks = [
   { name: 'Glucose', detail: 'See your levels without the finger prick.', color: 'yellow' },
   { name: 'Cholesterol', detail: 'A clearer view of your heart health.', color: 'blue' },
-  { name: 'Urea', detail: 'Stay informed about kidney wellness.', color: 'coral' },
+  { name: 'Creatine', detail: 'Stay informed about kidney wellness.', color: 'coral' },
 ];
 
 function App() {
@@ -30,13 +31,29 @@ function App() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
+  useEffect(() => {
+    const handleSelectCheck = (event: Event) => {
+      const checkName = (event as CustomEvent<string>).detail;
+      const selectedIndex = checks.findIndex((check) => check.name.toLowerCase() === checkName);
+      if (selectedIndex >= 0) setActiveCheck(selectedIndex);
+    };
+    const handleOpenCare = () => setShowAssistant(true);
+    window.addEventListener('lifepatch:select-check', handleSelectCheck);
+    window.addEventListener('lifepatch:open-care', handleOpenCare);
+    return () => {
+      window.removeEventListener('lifepatch:select-check', handleSelectCheck);
+      window.removeEventListener('lifepatch:open-care', handleOpenCare);
+    };
+  }, []);
+
   const handleSubscribe = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (email.trim()) setSubscribed(true);
   };
 
   return (
-    <main className="site-shell">
+    <>
+      <main className="site-shell">
       <nav className="nav container">
         <a className="brand" href="#top" aria-label="LifePatch home">
           <img className="brand-image" src="/Screenshot_2026-09-29_192259.png" alt="LifePatch" />
@@ -64,7 +81,7 @@ function App() {
           <div className="hero-orbit orbit-one" />
           <div className="hero-orbit orbit-two" />
           <div className="hero-card hero-card-top"><Zap size={15} fill="currentColor" /> Live insights</div>
-          <div className="woman-frame"><img src={womanImage} alt="Woman wearing the LifePatch device on her upper arm" /></div>
+          <div className="woman-frame"><img src={womanImage} alt="Woman wearing the LifePatch device on her upper arm" /><div className="patch-on-arm" aria-label="LifePatch wearable"><span className="patch-brand"><HeartPulse size={14} /> LifePatch</span><span className="patch-glow" /></div></div>
           <div className="hero-caption"><span>01</span><strong>Made for busy lives</strong><span className="caption-line" /></div>
           <div className="vital-card"><div className="vital-head"><span><span className="live-dot" /> Live now</span><HeartPulse size={16} /></div><div className="vital-number">94 <small>mg/dL</small></div><div className="chart"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="vital-foot"><span>Glucose</span><b>in range</b></div></div>
         </div>
@@ -109,7 +126,9 @@ function App() {
       <footer className="footer container"><a className="brand" href="#top"><img className="brand-image" src="/Screenshot_2026-09-29_192259.png" alt="LifePatch" /></a><div className="footer-news"><span>Stay in the loop</span>{subscribed ? <strong>You're on the list.</strong> : <form onSubmit={handleSubscribe}><input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Your email address" type="email" aria-label="Your email address" required /><button aria-label="Subscribe"><ArrowUpRight size={16} /></button></form>}</div><span className="footer-note">© 2024 LifePatch. Built for better days.</span></footer>
 
       {showAssistant && <div className="modal-backdrop" onClick={() => setShowAssistant(false)}><div className="assistant-modal" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setShowAssistant(false)} aria-label="Close"><X size={20} /></button><div className="assistant-icon"><Sparkles size={22} /></div><p className="kicker">A calmer way to care</p><h2>Talk it through<br /><em>with me.</em></h2><p>Your LifePatch companion helps you make sense of your readings, prepare for appointments, and build healthy habits that fit your life.</p><div className="assistant-message"><span><HeartPulse size={16} /></span><div><small>LifePatch companion</small><strong>How are you feeling today?</strong></div></div><button className="button button-dark" onClick={() => setShowAssistant(false)}>Start a check-in <ArrowUpRight size={17} /></button></div></div>}
-    </main>
+      </main>
+      <Assistant />
+    </>
   );
 }
 
