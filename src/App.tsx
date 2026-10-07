@@ -16,7 +16,7 @@ import {
   Zap,
 } from 'lucide-react';
 
-const womanImage = '/Screenshot_2026-09-29_220305.png';
+const womanImage = '/Screenshot_2026-09-29_220305 copy.png';
 const seniorImage = 'https://images.pexels.com/photos/28278106/pexels-photo-28278106.jpeg?auto=compress&cs=tinysrgb&h=1000&w=1500';
 
 const checks = [
@@ -81,7 +81,7 @@ function App() {
           <div className="hero-orbit orbit-one" />
           <div className="hero-orbit orbit-two" />
           <div className="hero-card hero-card-top"><Zap size={15} fill="currentColor" /> Live insights</div>
-          <div className="woman-frame"><img src={womanImage} alt="Woman wearing the LifePatch device on her upper arm" /><div className="patch-on-arm" aria-label="LifePatch wearable"><span className="patch-brand"><HeartPulse size={14} /> LifePatch</span><span className="patch-glow" /></div></div>
+          <div className="woman-frame"><img src={womanImage} alt="Woman wearing the LifePatch device on her upper arm" /></div>
           <div className="hero-caption"><span>01</span><strong>Made for busy lives</strong><span className="caption-line" /></div>
           <div className="vital-card"><div className="vital-head"><span><span className="live-dot" /> Live now</span><HeartPulse size={16} /></div><div className="vital-number">94 <small>mg/dL</small></div><div className="chart"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="vital-foot"><span>Glucose</span><b>in range</b></div></div>
         </div>
